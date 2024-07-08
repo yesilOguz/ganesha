@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "3.10" ]
+        python-version: ["3.10"]
       fail-fast: false
 
     steps:
@@ -54,13 +54,14 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_KEY }}
 
     - name: Deploy on Droplet
-      run: ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-        docker rmi ganesha-backend-web
-        docker rmi registry.digitalocean.com/ganesha/dev
-        docker-compose -f docker-compose.beta.yml build
-        docker image ls | grep ganesha-backend-web
-        doctl registry login --expiry-seconds 1200
-        docker tag ganesha-backend-web registry.digitalocean.com/ganesha/dev
-        docker push registry.digitalocean.com/ganesha/dev
-      EOF
+      run: |
+        ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << EOF
+          docker rmi ganesha-backend-web
+          docker rmi registry.digitalocean.com/ganesha/dev
+          docker-compose -f docker-compose.beta.yml build
+          docker image ls | grep ganesha-backend-web
+          doctl registry login --expiry-seconds 1200
+          docker tag ganesha-backend-web registry.digitalocean.com/ganesha/dev
+          docker push registry.digitalocean.com/ganesha/dev
+        EOF
 
