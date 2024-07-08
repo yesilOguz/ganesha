@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  web:
+    image: ganesha-backend-web:tag
+    build:
+      context: .
+    env_file:
+      - .env.beta
+#    command: bash -c "
+#      uvicorn main:app
+#      --host 0.0.0.0 --port 8080
+#      --lifespan=on --use-colors
+#      --reload
+#      "
+    volumes:
+      - .:/code
+    expose:
+      - "8080"
+    ports:
+      - 8080:8080

@@ -1,0 +1,75 @@
+name: Deploy to DigitalOcean
+
+on:
+  workflow_run:
+    workflows: Unit Tests
+    branches: main
+    types: completed
+
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Image version'
+        required: true
+
+#2
+env:
+  REGISTRY: "registry.digitalocean.com/ganesha"
+  IMAGE_NAME: "ganesha-backend-image"
+
+jobs:
+  build_and_push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.10" ]
+      fail-fast: false
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DO_PAT }}
+
+    - name: Build container image
+      run: docker build $(buildargs.sh .env.beta) -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest .
+
+    - name: Login DigitalOcean Container Registry
+      run: doctl registry login --expiry-seconds 1200
+
+    - name: Remove all old images
+      run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_NAME)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_NAME) $(doctl registry repository list-tags $(echo $IMAGE_NAME) | grep -o "sha.*") --force; else echo "No repository"; fi
+
+    - name: Push image to DigitalOcean Container Registry
+      run: |
+        docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+        docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
+
+    - name: s1
+      run: |
+        doctl apps list --format ID,Spec.Name | grep datacenter | cut -d " " -f1
+
+    - name: s2
+      run: |
+        doctl apps list-deployments "$(doctl apps list --format ID,Spec.Name | grep datacenter | cut -d " " -f1)" --format ID,Phase,Cause --no-header true | head -n1
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-3.11-${{ hashFiles('**/poetry.lock') }}
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
