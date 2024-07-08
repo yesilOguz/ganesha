@@ -6,14 +6,12 @@ on:
     branches: main
     types: completed
 
-
   workflow_dispatch:
     inputs:
       version:
         description: 'Image version'
         required: true
 
-#2
 env:
   REGISTRY: "registry.digitalocean.com/ganesha"
   IMAGE_NAME: "ganesha-backend-image"
@@ -50,26 +48,19 @@ jobs:
         docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
         docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
 
-    - name: s1
-      run: |
-        doctl apps list --format ID,Spec.Name | grep datacenter | cut -d " " -f1
-
-    - name: s2
-      run: |
-        doctl apps list-deployments "$(doctl apps list --format ID,Spec.Name | grep datacenter | cut -d " " -f1)" --format ID,Phase,Cause --no-header true | head -n1
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-3.11-${{ hashFiles('**/poetry.lock') }}
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root
+        ssh-private-key: ${{ secrets.SSH_KEY }}
+
+    - name: Deploy on Droplet
+      run: ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+        docker rmi ganesha-backend-web
+        docker rmi registry.digitalocean.com/ganesha/dev
+        docker-compose -f docker-compose.beta.yml build
+        docker image ls | grep ganesha-backend-web
+        doctl registry login --expiry-seconds 1200
+        docker tag ganesha-backend-web registry.digitalocean.com/ganesha/dev
+        docker push registry.digitalocean.com/ganesha/dev
+      EOF
+
