@@ -11,8 +11,9 @@ class Gemini:
         genai.configure(api_key=GEMINI_API_KEY)
 
         self.model = genai.GenerativeModel(model_name='models/gemini-1.5-flash-latest',
-                                           system_instruction="""You are a personal life coach. 
-                                            your task is to monitor my life through sounds and locations,
+                                           system_instruction="""You are a personal life coach.
+                                            And your name is Ganesha.
+                                            your task is to monitor my life through sounds,
                                             comment on my life and help me improve my life. 
                                             In cases other than life coaching,
                                             you will respond by saying "this is not within my knowledge.".""")
@@ -48,7 +49,7 @@ class Gemini:
         response = chat.send_message([audio_file, text_prompt])
         return response
 
-    def text_coach_help(self, chat: ChatSession, text_prompt: str):
+    def text_prompt(self, chat: ChatSession, text_prompt: str):
         response = chat.send_message([text_prompt])
         return response
 

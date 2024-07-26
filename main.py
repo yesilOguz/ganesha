@@ -9,6 +9,8 @@ from ganesha.core.mongo_database import MONGO
 
 from ganesha.user.routes import router as user_router
 from ganesha.coach.routes import router as coach_router
+from ganesha.character.routes import router as character_router
+from ganesha.health.routes import router as health_router
 
 router = APIRouter()
 fake = Faker()
@@ -40,7 +42,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,3 +52,5 @@ app.add_middleware(
 app.include_router(router)
 app.include_router(user_router, prefix='/user')
 app.include_router(coach_router, prefix='/coach')
+app.include_router(character_router, prefix='/character')
+app.include_router(health_router, prefix='/health')

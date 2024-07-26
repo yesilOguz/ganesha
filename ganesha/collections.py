@@ -6,6 +6,7 @@ from ganesha.core.mongo_database import DB
 
 class Collections(Enum):
     USER_COLLECTION = 'user'
+    CAMERA_SETTINGS_COLLECTION = 'camera_settings'
 
 
 def get_collection(collection: Collections):

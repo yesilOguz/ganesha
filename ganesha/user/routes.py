@@ -1,13 +1,18 @@
+import re
+from typing import Annotated
+
 from bson import ObjectId
 from fastapi import APIRouter, status, HTTPException, Security, Body
 from fastapi_jwt import JwtAuthorizationCredentials
 
 from ganesha.auth.models import AuthResponse, RefreshResponse
-from ganesha.core.validator import validate_object_id
+
+from ganesha.core.GaneshaBaseModel import ObjectIdPydanticAnnotation
 
 from ganesha.auth.login_utilities import access_security, refresh_security, refresh
 from ganesha.models import StatusResponse
 from ganesha.auth.login_utilities import auth_user
+from ganesha.patterns import Patterns
 from ganesha.user.models import UserLoginModel, UserDBModel, UserRegisterModel, \
     UserUpdateResponseModel, UserUpdateModel, UserGetResponseModel
 from ganesha.collections import get_collection, Collections
@@ -17,12 +22,16 @@ router = APIRouter()
 
 @router.post('/login', status_code=status.HTTP_200_OK, response_model=AuthResponse)
 def login_user(user: UserLoginModel = Body(...)):
+    if not re.match(Patterns.EMAIL.value, user.email):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+                            detail='email is not correct')
+
     get_db_user_collection = get_collection(Collections.USER_COLLECTION).find_one({'email': user.email,
                                                                                    'password': user.password})
     get_db_user = UserDBModel.from_mongo(get_db_user_collection)
 
     if not get_db_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='email or password is wrong')
 
     return auth_user(get_db_user)
@@ -30,6 +39,10 @@ def login_user(user: UserLoginModel = Body(...)):
 
 @router.post('/register', status_code=status.HTTP_201_CREATED, response_model=AuthResponse)
 def register_user(user: UserRegisterModel = Body(...)):
+    if not re.match(Patterns.EMAIL.value, user.email):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+                            detail='email is not correct')
+
     check_user_for_email = get_collection(Collections.USER_COLLECTION).find_one({'email': user.email})
 
     if check_user_for_email:
@@ -70,11 +83,9 @@ def update_user(user: UserUpdateModel = Body(...),
     return updated_user
 
 
-@router.get('/get-user/{user_id_param}', status_code=status.HTTP_200_OK, response_model=UserGetResponseModel)
-@validate_object_id('user_id_param')
-def get_user(user_id_param: str,
+@router.get('/get-user/{user_id}', status_code=status.HTTP_200_OK, response_model=UserGetResponseModel)
+def get_user(user_id: Annotated[ObjectId, ObjectIdPydanticAnnotation],
              credentials: JwtAuthorizationCredentials = Security(access_security)):
-    user_id = ObjectId(user_id_param)
     wanted_user_collection = get_collection(Collections.USER_COLLECTION).find_one({'_id': user_id})
     wanted_user = UserGetResponseModel.from_mongo(wanted_user_collection)
 
@@ -85,11 +96,9 @@ def get_user(user_id_param: str,
     return wanted_user
 
 
-@router.get('/delete-user/{user_id_param}', status_code=status.HTTP_200_OK, response_model=StatusResponse)
-@validate_object_id('user_id_param')
-def delete_user(user_id_param: str,
+@router.get('/delete-user/{user_id}', status_code=status.HTTP_200_OK, response_model=StatusResponse)
+def delete_user(user_id: Annotated[ObjectId, ObjectIdPydanticAnnotation],
                 credentials: JwtAuthorizationCredentials = Security(access_security)):
-    user_id = ObjectId(user_id_param)
-    get_collection(Collections.USER_COLLECTION).find_one_and_delete({'_id': user_id})
+    deleted = get_collection(Collections.USER_COLLECTION).find_one_and_delete({'_id': user_id})
 
-    return StatusResponse(status=True)
+    return StatusResponse(status=deleted is not None)

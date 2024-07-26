@@ -1,14 +1,6 @@
-from ganesha.core.GaneshaBaseModel import GaneshaBaseModel
+from ganesha.core.GaneshaBaseModel import GaneshaBaseModel, ObjectIdPydanticAnnotation
 
 
-class locationModel(GaneshaBaseModel):
-    latitude: float
-    longitude: float
-
-
-class process8hrModel(GaneshaBaseModel):
-    locations: list[locationModel] = []
-
-
-class process8hrModelResponse(GaneshaBaseModel):
+class processAudioModelResponse(GaneshaBaseModel):
     response_from_coach: str
+

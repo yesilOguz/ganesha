@@ -2,22 +2,23 @@ from ganesha.core.GaneshaBaseModel import GaneshaBaseModel, ObjectIdPydanticAnno
 from bson import ObjectId
 from typing import Annotated, Optional
 
+from ganesha.user.roles import UserRole
+
 
 class UserDBModel(GaneshaBaseModel):
     id: Annotated[ObjectId, ObjectIdPydanticAnnotation]
     full_name: str
     email: str
     password: str
-    country: str
-    city: str
+    recognized_user: bool = False
+    role: UserRole = UserRole.END_USER.value
 
 
 class UserRegisterModel(GaneshaBaseModel):
     full_name: str
     email: str
     password: str
-    country: str
-    city: str
+    role: UserRole = UserRole.END_USER.value
 
 
 class UserLoginModel(GaneshaBaseModel):
@@ -29,28 +30,25 @@ class UserResponseModel(GaneshaBaseModel):
     id: Annotated[ObjectId, ObjectIdPydanticAnnotation]
     full_name: str
     email: str
-    country: str
-    city: str
+    recognized_user: bool = False
+    role: UserRole = UserRole.END_USER.value
 
 
 class UserUpdateModel(GaneshaBaseModel):
     full_name: Optional[str] = None
     email: Optional[str] = None
-    country: Optional[str] = None
-    city: Optional[str] = None
 
 
 class UserUpdateResponseModel(GaneshaBaseModel):
     id: Annotated[ObjectId, ObjectIdPydanticAnnotation]
     full_name: str
     email: str
-    country: str
-    city: str
+    recognized_user: bool = False
 
 
 class UserGetResponseModel(GaneshaBaseModel):
     id: Annotated[ObjectId, ObjectIdPydanticAnnotation]
     full_name: str
     email: str
-    country: str
-    city: str
+    recognized_user: bool = False
+    role: UserRole = UserRole.END_USER.value
