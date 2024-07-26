@@ -60,10 +60,13 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y docker-ce docker-ce-cli containerd.io
           fi
+
+          # Save host environment variables to a file
+          printenv > /tmp/env.list
           
-          # Pull and run Docker container
+          # Pull and run Docker container with environment variables
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           docker stop ganesha-backend || true
           docker rm ganesha-backend || true
-          docker run -d --name ganesha-backend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker run --env-file /tmp/env.list -d --name ganesha-backend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         EOF
