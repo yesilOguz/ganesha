@@ -68,5 +68,5 @@ jobs:
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           docker stop ganesha-backend || true
           docker rm ganesha-backend || true
-          docker run --env-file /tmp/env.list -d --name ganesha-backend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker run -p 5000:8080 --env-file /tmp/env.list -d --name ganesha-backend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         EOF

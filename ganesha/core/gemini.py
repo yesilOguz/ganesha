@@ -44,7 +44,8 @@ class Gemini:
             file_name = file_path
 
         audio_file = genai.upload_file(path=file_path,
-                                       display_name=file_name)
+                                       display_name=file_name,
+                                       mime_type='audio/mp4')
 
         response = chat.send_message([audio_file, text_prompt])
         return response

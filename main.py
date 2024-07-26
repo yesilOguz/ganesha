@@ -33,12 +33,7 @@ async def lifespan(app: FastAPI):
     MONGO.shut_down_db()
 
 
-app = FastAPI(lifespan=lifespan)
-
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-]
+app = FastAPI(lifespan=lifespan, docs_url=None)
 
 app.add_middleware(
     CORSMiddleware,
