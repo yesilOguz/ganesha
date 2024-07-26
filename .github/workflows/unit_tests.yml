@@ -50,4 +50,5 @@ jobs:
           MONGO_DB: ganesha_backend_test_database
           MONGO_COLLECTION: ganesha_backend_test_database_collection
           MONGO_URL: mongodb://admin:admin@127.0.0.1:27017/?retryWrites=true&w=majority
-          SECRET: 1215c269e46c098f9b2bce3c332ed69271e53c3d8196a2cab2906186f45f10e0
+          SECRET: test_secret
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
