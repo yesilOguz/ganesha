@@ -61,12 +61,22 @@ jobs:
             sudo apt-get install -y docker-ce docker-ce-cli containerd.io
           fi
 
+          # Create Docker volumes if they do not exist
+          if ! docker volume inspect ganesha-backend-histories > /dev/null 2>&1; then docker volume create ganesha-backend-histories; fi
+          if ! docker volume inspect ganesha-backend-models > /dev/null 2>&1; then docker volume create ganesha-backend-models; fi
+          if ! docker volume inspect ganesha-backend-records > /dev/null 2>&1; then docker volume create ganesha-backend-records; fi
+
           # Save host environment variables to a file
           printenv > /tmp/env.list
-          
-          # Pull and run Docker container with environment variables
+
+          # Pull and run Docker container with volumes and environment variables
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           docker stop ganesha-backend || true
           docker rm ganesha-backend || true
-          docker run -p 5000:8080 --env-file /tmp/env.list -d --name ganesha-backend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker run -p 5000:8080 --env-file /tmp/env.list \
+            -v ganesha-backend-histories:./histories \
+            -v ganesha-backend-models:./models \
+            -v ganesha-backend-records:./records \
+            -d --name ganesha-backend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         EOF
+

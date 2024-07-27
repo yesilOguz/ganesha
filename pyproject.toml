@@ -20,6 +20,7 @@ google-generativeai = "0.7.0"
 authlib = "^1.3.1"
 pyt2s = "^0.0.4"
 faker-file = {extras = ["common"], version = "^0.17.11"}
+jsonpickle = "^3.2.2"
 
 
 [build-system]

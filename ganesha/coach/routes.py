@@ -45,6 +45,8 @@ def process_audio_data(audio_file: UploadFile = File(...),
         f.write(audio_file.file.read())
 
     process = GEMINI.audio_file_prompt(chat=chat, text_prompt='', file_path=file_name)
+    GEMINI.save_chat(user_id=user_id, chat=chat)
+
     return processAudioModelResponse(response_from_coach=process.text)
 
 
@@ -68,6 +70,9 @@ def get_daily_advice(selected_model: str, credentials: JwtAuthorizationCredentia
                                     Please share your analysis and suggestions on these topics, using my conversations recorded throughout the day as a reference. Write them as plain text, spoken text, not as categories. Thanks.""")
 
     file_name = get_voice(advice.text, str(user_id), selected_model)
+
+    GEMINI.save_chat(user_id=user_id, chat=chat)
+
     return FileResponse(file_name)
 
 
@@ -80,6 +85,7 @@ def chat_with_ganesha(selected_model: str, text: str,
     response_from_ganesha = GEMINI.text_prompt(chat, text)
 
     file_name = get_voice(response_from_ganesha.text, str(user_id), selected_model)
+    GEMINI.save_chat(user_id=user_id, chat=chat)
     return FileResponse(file_name)
 
 
@@ -98,6 +104,7 @@ def chat_with_ganesha_with_voice(selected_model: str, audio_file: UploadFile = F
     response_from_ganesha = GEMINI.audio_file_prompt(chat=chat, text_prompt='', file_path=file_name)
 
     file_name = get_voice(response_from_ganesha.text, str(user_id), selected_model)
+    GEMINI.save_chat(user_id=user_id, chat=chat)
     return FileResponse(file_name)
 
 
@@ -122,5 +129,7 @@ def recognize_me(audio_file: UploadFile = File(...),
     user.recognized_user = True
     get_collection(Collections.USER_COLLECTION).find_one_and_update(filter={'_id': user.id},
                                                                     update={'$set': user.to_mongo(exclude_unset=False)})
+
+    GEMINI.save_chat(user_id=user_id, chat=chat)
 
     return StatusResponse(status=True)

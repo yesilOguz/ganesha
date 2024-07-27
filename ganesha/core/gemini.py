@@ -1,5 +1,6 @@
 import json
 
+import jsonpickle
 from google.generativeai import ChatSession
 import google.generativeai as genai
 import os
@@ -8,9 +9,18 @@ import os
 class Gemini:
     def __init__(self):
         GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+
+        safety_settings = {
+            "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+            "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
+            "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+            "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+        }
+
         genai.configure(api_key=GEMINI_API_KEY)
 
         self.model = genai.GenerativeModel(model_name='models/gemini-1.5-flash-latest',
+                                           safety_settings=safety_settings,
                                            system_instruction="""You are a personal life coach.
                                             And your name is Ganesha.
                                             your task is to monitor my life through sounds,
@@ -22,14 +32,18 @@ class Gemini:
         file_name = f'{user_id}-history.json'
         if os.path.exists(file_name):
             with open(file_name, 'r') as file:
-                return self.model.start_chat(history=json.load(file))
+                chat_history = jsonpickle.decode(json.load(file))
+                return self.model.start_chat(history=chat_history)
 
         return self.model.start_chat(history=[])
 
     def save_chat(self, user_id: str, chat: ChatSession):
-        file_name = f'{user_id}-history.json'
+        histories_path = './histories'
+        file_name = f'{histories_path}/{user_id}-history.json'
+
+        json_string = jsonpickle.encode(chat.history, True)
         with open(file_name, 'w') as f:
-            json.dump(chat.history, f)
+            f.write(json_string)
 
     def list_models(self):
         models = []
