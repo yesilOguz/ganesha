@@ -52,3 +52,5 @@ jobs:
           MONGO_URL: mongodb://admin:admin@127.0.0.1:27017/?retryWrites=true&w=majority
           SECRET: test_secret
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          EMAIL: ${{ secrets.EMAIL }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
