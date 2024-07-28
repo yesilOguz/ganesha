@@ -2,7 +2,10 @@ from ganesha.core.GaneshaBaseModel import GaneshaBaseModel, ObjectIdPydanticAnno
 from bson import ObjectId
 from typing import Annotated, Optional
 
+from ganesha.user.otp_types import OTP_TYPES
 from ganesha.user.roles import UserRole
+
+import datetime
 
 
 class UserDBModel(GaneshaBaseModel):
@@ -52,3 +55,26 @@ class UserGetResponseModel(GaneshaBaseModel):
     email: str
     recognized_user: bool = False
     role: UserRole = UserRole.END_USER.value
+
+
+class UserRenewPassword(GaneshaBaseModel):
+    password: str
+
+
+class UserOTPModel(GaneshaBaseModel):
+    id: Annotated[ObjectId, ObjectIdPydanticAnnotation]
+    requested_by: Annotated[ObjectId, ObjectIdPydanticAnnotation]
+    created_time: datetime.datetime
+    end_time: datetime.datetime
+    otp_code: str
+    otp_type: OTP_TYPES
+
+
+class UserOTPCreateModel(GaneshaBaseModel):
+    requested_by: Annotated[ObjectId, ObjectIdPydanticAnnotation]
+    created_time: datetime.datetime
+    end_time: datetime.datetime
+    otp_code: str
+    otp_type: OTP_TYPES
+
+
