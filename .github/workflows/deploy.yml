@@ -66,14 +66,11 @@ jobs:
           if ! docker volume inspect ganesha-backend-models > /dev/null 2>&1; then docker volume create ganesha-backend-models; fi
           if ! docker volume inspect ganesha-backend-records > /dev/null 2>&1; then docker volume create ganesha-backend-records; fi
 
-          # Save host environment variables to a file
-          printenv > /tmp/env.list
-
           # Pull and run Docker container with volumes and environment variables
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           docker stop ganesha-backend || true
           docker rm ganesha-backend || true
-          docker run -p 5000:8080 --env-file /tmp/env.list \
+          docker run -p 5000:8080 --env-file ~/env.list \
             -v ganesha-backend-histories:/code/histories \
             -v ganesha-backend-models:/code/models \
             -v ganesha-backend-records:/code/records \
