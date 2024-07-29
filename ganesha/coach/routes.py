@@ -22,6 +22,16 @@ def get_voice(text: str, user_id: str, selected_model: str):
     voice = stream_elements.Voice.Brian.value
     if selected_model == 'man':
         voice = stream_elements.Voice.Brian.value
+    elif selected_model == 'batman':
+        voice = stream_elements.Voice.Geraint.value
+    elif selected_model == 'scout-girl':
+        voice = stream_elements.Voice.Mia.value
+    elif selected_model == 'real-man':
+        voice = stream_elements.Voice.Mathieu.value
+    elif selected_model == 'steve':
+        voice = stream_elements.Voice.Matthew.value
+    elif selected_model == 'trump':
+        voice = stream_elements.Voice.Russell.value
 
     voice_data = stream_elements.requestTTS(text, voice)
     file_name = f'records/{datetime.datetime.now()} - response-for-{user_id}.mp3'
