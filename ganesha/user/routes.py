@@ -85,6 +85,13 @@ def register_user(user: UserRegisterModel = Body(...)):
 
 @router.get('/refresh-token', status_code=status.HTTP_200_OK, response_model=RefreshResponse)
 def refresh_token(credentials: JwtAuthorizationCredentials = Security(refresh_security)):
+    user_id = credentials.subject['id']
+    db_check_user = get_collection(Collections.USER_COLLECTION).find_one({'_id': ObjectId(user_id)})
+
+    if not db_check_user:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+                            detail='there is no user with this id anymore')
+
     return refresh(credentials.subject)
 
 
