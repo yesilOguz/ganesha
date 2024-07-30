@@ -1,6 +1,6 @@
 class TestSendForgotOtp:
     def test_send_forgot_otp(self, test_client, UserDBFactory):
-        user = UserDBFactory(email='ganesha-coach-online@gmail.com')
+        user = UserDBFactory(email='ganesha.coach.online@gmail.com')
 
         response = test_client.get(f'/user/send-forgot-otp/{user.email}')
 
