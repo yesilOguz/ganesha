@@ -27,7 +27,7 @@ def get_voice(text: str, user_id: str, selected_model: str):
     elif selected_model == 'scout-girl':
         voice = stream_elements.Voice.Mia.value
     elif selected_model == 'real-man':
-        voice = stream_elements.Voice.Mathieu.value
+        voice = stream_elements.Voice.en_GB_Wavenet_B.value
     elif selected_model == 'steve':
         voice = stream_elements.Voice.Matthew.value
     elif selected_model == 'trump':
