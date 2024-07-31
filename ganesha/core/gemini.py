@@ -59,13 +59,13 @@ class Gemini:
 
         audio_file = genai.upload_file(path=file_path,
                                        display_name=file_name,
-                                       mime_type='audio/mp4')
+                                       mime_type='audio/mp4',)
 
-        response = chat.send_message([audio_file, text_prompt])
+        response = chat.send_message([audio_file, text_prompt], request_options={"timeout": 1000})
         return response
 
     def text_prompt(self, chat: ChatSession, text_prompt: str):
-        response = chat.send_message([text_prompt])
+        response = chat.send_message([text_prompt], request_options={"timeout": 1000})
         return response
 
 
